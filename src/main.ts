@@ -1,0 +1,25 @@
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.enableCors();
+  app.setGlobalPrefix('api/v1');
+
+  const config = new DocumentBuilder()
+    .setTitle('Beebites API')
+    .setDescription('Beebites Food Ordering Platform')
+    .setVersion('2.0')
+    .addBearerAuth()
+    .build();
+  SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config));
+
+  await app.listen(process.env.PORT || 3000);
+  console.log(`🚀 Running on: http://localhost:${process.env.PORT || 3000}`);
+  console.log(`📚 Swagger: http://localhost:${process.env.PORT || 3000}/api/docs`);
+}
+bootstrap();
