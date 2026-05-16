@@ -42,11 +42,17 @@ export class PaymentService {
   async createPayment(dto: CreatePaymentDto): Promise<Payment> {
     const payment = this.paymentRepository.create(dto);
     const saved = await this.paymentRepository.save(payment);
-    // Observer Pattern: notify when payment is created
+
+    // Update paymentId di order
+    await this.paymentRepository.manager.update(
+      'order',
+      { orderId: dto.orderId },
+      { paymentId: saved.paymentId },
+    );
+
     await this.notificationService.notify(
       `Payment #${saved.paymentId} created for order #${saved.orderId} via ${saved.paymentType}`,
-      'payment_created',
-      saved.paymentId,
+      'payment_created', saved.paymentId,
     );
     return saved;
   }
