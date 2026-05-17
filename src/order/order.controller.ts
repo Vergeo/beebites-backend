@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Delete, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/order.dto';
@@ -12,26 +12,26 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @ApiOperation({ summary: 'Create order' })
-  @Post('createOrder')
+  @Post('create-order')
   createOrder(@Body() dto: CreateOrderDto) {
     return this.orderService.createOrder(dto);
   }
 
   @ApiOperation({ summary: 'Get order by ID' })
-  @Post('getOrder')
-  getOrder(@Body('orderId') orderId: number) {
-    return this.orderService.getOrder(orderId);
+  @Get('get-order/:orderId')
+  getOrder(@Param('orderId') orderId: number) {
+    return this.orderService.getOrder(+orderId);
   }
 
   @ApiOperation({ summary: 'Get orders by payment ID' })
-  @Post('getOrdersByPayment')
-  getOrdersByPayment(@Body('paymentId') paymentId: number) {
-    return this.orderService.getOrdersByPayment(paymentId);
+  @Get('get-orders-by-payment/:paymentId')
+  getOrdersByPayment(@Param('paymentId') paymentId: number) {
+    return this.orderService.getOrdersByPayment(+paymentId);
   }
 
   @ApiOperation({ summary: 'Delete order' })
-  @Post('deleteOrder')
-  deleteOrder(@Body('orderId') orderId: number) {
-    return this.orderService.deleteOrder(orderId);
+  @Delete('delete-order/:orderId')
+  deleteOrder(@Param('orderId') orderId: number) {
+    return this.orderService.deleteOrder(+orderId);
   }
 }
