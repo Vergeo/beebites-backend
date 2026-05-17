@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Order } from '../../order/entities/order.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('payments')
 export class Payment {
@@ -10,7 +10,7 @@ export class Payment {
 
   @ApiProperty()
   @Column()
-  orderId: number;
+  userId: number;
 
   @ApiProperty()
   @Column({ type: 'varchar', length: 500 })
@@ -19,7 +19,7 @@ export class Payment {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => Order, { eager: true, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'orderId' })
-  order: Order;
+  @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
 }

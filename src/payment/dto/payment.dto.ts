@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreatePaymentDto {
   @ApiProperty()
   @IsNumber()
-  orderId: number;
+  userId: number;
 
   @ApiProperty({ enum: ['qris', 'cash', 'transfer'], example: 'qris' })
   @IsString()

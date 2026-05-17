@@ -14,26 +14,24 @@ export class PaymentService {
   ) {}
 
   async getAllPaymentsByUser(userId: number): Promise<Payment[]> {
-    return this.paymentRepository
-      .createQueryBuilder('payment')
-      .leftJoinAndSelect('payment.order', 'order')
-      .where('order.userId = :userId', { userId })
-      .getMany();
+    return this.paymentRepository.find({ where: { userId } });
   }
 
   async getAllPaymentsByTenant(tenantId: number): Promise<Payment[]> {
     return this.paymentRepository
       .createQueryBuilder('payment')
-      .leftJoinAndSelect('payment.order', 'order')
-      .leftJoinAndSelect('order.menu', 'menu')
+      .leftJoinAndSelect('payment.user', 'user')
+      .innerJoin('order', 'order', 'order.paymentId = payment.paymentId')
+      .innerJoin('menus', 'menu', 'menu.menuId = order.menuId')
       .where('menu.tenantId = :tenantId', { tenantId })
+      .distinct(true)
       .getMany();
   }
 
   async getPaymentDetails(paymentId: number): Promise<Payment> {
     const payment = await this.paymentRepository.findOne({
       where: { paymentId },
-      relations: ['order', 'order.menu', 'order.user'],
+      relations: ['user'],
     });
     if (!payment) throw new NotFoundException(`Payment #${paymentId} not found`);
     return payment;
@@ -42,17 +40,10 @@ export class PaymentService {
   async createPayment(dto: CreatePaymentDto): Promise<Payment> {
     const payment = this.paymentRepository.create(dto);
     const saved = await this.paymentRepository.save(payment);
-
-    // Update paymentId di order
-    await this.paymentRepository.manager.update(
-      'order',
-      { orderId: dto.orderId },
-      { paymentId: saved.paymentId },
-    );
-
     await this.notificationService.notify(
-      `Payment #${saved.paymentId} created for order #${saved.orderId} via ${saved.paymentType}`,
-      'payment_created', saved.paymentId,
+      `Payment #${saved.paymentId} created by user #${saved.userId} via ${saved.paymentType}`,
+      'payment_created',
+      saved.paymentId,
     );
     return saved;
   }

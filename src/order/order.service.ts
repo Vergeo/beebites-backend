@@ -16,9 +16,8 @@ export class OrderService {
   async createOrder(dto: CreateOrderDto): Promise<Order> {
     const order = this.orderRepository.create(dto);
     const saved = await this.orderRepository.save(order);
-    // Observer Pattern: notify when order is created
     await this.notificationService.notify(
-      `New order #${saved.orderId} created by user #${saved.userId}`,
+      `New order #${saved.orderId} created`,
       'order_created',
       saved.orderId,
     );
@@ -28,10 +27,17 @@ export class OrderService {
   async getOrder(orderId: number): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { orderId },
-      relations: ['menu', 'user'],
+      relations: ['menu', 'payment'],
     });
     if (!order) throw new NotFoundException(`Order #${orderId} not found`);
     return order;
+  }
+
+  async getOrdersByPayment(paymentId: number): Promise<Order[]> {
+    return this.orderRepository.find({
+      where: { paymentId },
+      relations: ['menu'],
+    });
   }
 
   async deleteOrder(orderId: number): Promise<{ message: string }> {
