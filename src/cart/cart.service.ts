@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Cart } from './entities/cart.entity';
-import { AddMenuToCartDto, UpdateCartDto } from './dto/cart.dto';
-import { Order } from '../order/entities/order.entity';
-import { OrderService } from '../order/order.service';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Cart } from "./entities/cart.entity";
+import { AddMenuToCartDto, UpdateCartDto } from "./dto/cart.dto";
+import { Order } from "../order/entities/order.entity";
+import { OrderService } from "../order/order.service";
 
 @Injectable()
 export class CartService {
@@ -59,6 +63,20 @@ export class CartService {
     const cartItems = await this.getCartByUser(userId);
     if (!cartItems.length) throw new BadRequestException("Cart is empty");
 
+    // Hitung total price dari cart
+    const totalPrice = cartItems.reduce(
+      (sum, item) => sum + item.menu.menuPrice * item.quantity,
+      0,
+    );
+
+    // Update totalPrice di payment
+    await this.cartRepository.manager.update(
+      "payments",
+      { paymentId },
+      { totalPrice },
+    );
+
+    // Buat order dari setiap item cart
     const orders: Order[] = [];
     for (const item of cartItems) {
       const order = await this.orderService.createOrder({
