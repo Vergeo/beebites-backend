@@ -37,4 +37,15 @@ export class MenuService {
     await this.menuRepository.remove(menu);
     return { message: `Menu #${menuId} deleted successfully` };
   }
+
+  async searchMenusFromTenant(tenantId: number, keyword: string): Promise<Menu[]> {
+  return this.menuRepository
+    .createQueryBuilder('menu')
+    .where('menu.tenantId = :tenantId', { tenantId })
+    .andWhere(
+      '(menu.menuName ILIKE :keyword OR menu.menuDescription ILIKE :keyword)',
+      { keyword: `%${keyword}%` },
+    )
+    .getMany();
+}
 }

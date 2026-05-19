@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Tenant, TenantStatus } from './entities/tenant.entity';
-import { CreateTenantDto, UpdateTenantDto } from './dto/tenant.dto';
-import { NotificationService } from '../notification/notification.service';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Tenant, TenantStatus } from "./entities/tenant.entity";
+import { CreateTenantDto, UpdateTenantDto } from "./dto/tenant.dto";
+import { NotificationService } from "../notification/notification.service";
 
 @Injectable()
 export class TenantsService {
@@ -24,7 +24,10 @@ export class TenantsService {
   }
 
   async createTenant(dto: CreateTenantDto): Promise<Tenant> {
-    const tenant = this.tenantRepository.create({ ...dto, status: TenantStatus.PENDING });
+    const tenant = this.tenantRepository.create({
+      ...dto,
+      status: TenantStatus.PENDING,
+    });
     return this.tenantRepository.save(tenant);
   }
 
@@ -47,7 +50,7 @@ export class TenantsService {
     const saved = await this.tenantRepository.save(tenant);
     await this.notificationService.notify(
       `Tenant "${tenant.tenantName}" has been accepted and is now active.`,
-      'tenant_accepted',
+      "tenant_accepted",
       tenantId,
     );
     return saved;
@@ -60,9 +63,19 @@ export class TenantsService {
     const saved = await this.tenantRepository.save(tenant);
     await this.notificationService.notify(
       `Tenant "${tenant.tenantName}" has been rejected.`,
-      'tenant_rejected',
+      "tenant_rejected",
       tenantId,
     );
     return saved;
+  }
+
+  async searchTenants(keyword: string): Promise<Tenant[]> {
+    return this.tenantRepository
+      .createQueryBuilder("tenant")
+      .where("tenant.tenantName ILIKE :keyword", { keyword: `%${keyword}%` })
+      .orWhere("tenant.tenantDescription ILIKE :keyword", {
+        keyword: `%${keyword}%`,
+      })
+      .getMany();
   }
 }
