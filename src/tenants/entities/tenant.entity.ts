@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from '../../users/entities/user.entity';
 
 export enum TenantStatus {
   PENDING = 'pending',
@@ -12,6 +13,10 @@ export class Tenant {
   @ApiProperty()
   @PrimaryGeneratedColumn()
   tenantId: number;
+
+  @ApiProperty()
+  @Column()
+  userId: number;
 
   @ApiProperty()
   @Column({ type: 'varchar', length: 500 })
@@ -36,4 +41,8 @@ export class Tenant {
   @ApiProperty()
   @Column({ type: 'varchar', length: 500, default: TenantStatus.PENDING })
   status: string;
+
+  @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
 }

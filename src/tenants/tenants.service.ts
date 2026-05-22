@@ -78,4 +78,11 @@ export class TenantsService {
       })
       .getMany();
   }
+
+  async getTenantByUserId(userId: number): Promise<Tenant> {
+    const tenant = await this.tenantRepository.findOne({ where: { userId } });
+    if (!tenant)
+      throw new NotFoundException(`Tenant for user #${userId} not found`);
+    return tenant;
+  }
 }

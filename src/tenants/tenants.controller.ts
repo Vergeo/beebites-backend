@@ -68,4 +68,10 @@ export class TenantsController {
   searchTenants(@Param("keyword") keyword: string) {
     return this.tenantsService.searchTenants(keyword);
   }
+
+  @ApiOperation({ summary: "Get tenant by user ID" })
+  @Get("get-tenant-by-user/:userId")
+  getTenantByUserId(@Param("userId") userId: string) {
+    return this.tenantsService.getTenantByUserId(+userId);
+  }
 }
