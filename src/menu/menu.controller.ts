@@ -16,7 +16,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
 @ApiTags("Menu")
 @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller("menu")
 export class MenuController {
   constructor(private readonly menuService: MenuService) {}

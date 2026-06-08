@@ -15,7 +15,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
 @ApiTags("Payment")
 @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller("payment")
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
